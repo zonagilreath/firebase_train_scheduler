@@ -64,6 +64,8 @@ setInterval(function(){
     updateTrainTable();
 }, 60000);
 
+trainsRef.on("value", updateTrainTable);
+
 
 function addTrain(event){
     event.preventDefault();
@@ -107,10 +109,10 @@ function openTrainEditor(event){
     trainsRef.child(trainKey).once("value", function(trainSnap){
         let trainData = trainSnap.val();
 
-        let nameInput = `<label for="name-edit">Train Name:</label><input class="form-control" id="name-edit" value=${trainData.name} type="text">`
-        let destinationInput = `<label for="destination-edit">Destination:</label><input class="form-control" id="destination-edit" value=${trainData.destination} type="text">`
-        let firstTrainInput = `<label for="first-time-edit">First Train:</label><input class="form-control" id="first-time-edit" value=${trainData.firstTrainTime} type="time">`
-        let frequencyInput = `<label for="frequency-edit">Frequency:</label><input class="form-control" id="frequency-edit" value=${trainData.frequency} type="number">`
+        let nameInput = `<label for="name-edit">Train Name:</label><input class="form-control" id="name-edit" value="${trainData.name}" type="text">`
+        let destinationInput = `<label for="destination-edit">Destination:</label><input class="form-control" id="destination-edit" value="${trainData.destination}" type="text">`
+        let firstTrainInput = `<label for="first-time-edit">First Train:</label><input class="form-control" id="first-time-edit" value="${trainData.firstTrainTime}" type="time">`
+        let frequencyInput = `<label for="frequency-edit">Frequency:</label><input class="form-control" id="frequency-edit" value="${trainData.frequency}" type="number">`
         let editSubmitButton = $("<button>").addClass("submit-edit-button").html('<i class="fa fa-check-square"></i>');
         let cancelButton = $("<button>").addClass("cancel-button").html('<i class="fa fa-ban"></i>');
         
