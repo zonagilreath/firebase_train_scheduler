@@ -36,31 +36,37 @@ class Train {
 
     createRow(){
         let row = $("<tr>").attr('id', this.key);
+        let editButton = $("<button>").addClass("edit-button").html('<i class="fa fa-edit"></i>');
+        let deleteButton = $("<button>").addClass("delete-button").html('<i class="fa fa-trash"></i>');
 
         row.append($("<td>").html(this.name));
         row.append($("<td>").html(this.destination));
         row.append($("<td>").html(this.frequency));
         row.append($("<td>").html(moment().add(this.timeTilNext, "minutes").format("HH:mm")));
         row.append($("<td>").html(this.timeTilNext));
+        row.append($("<td>").html(editButton));
+        row.append($("<td>").html(deleteButton));
 
         return row
     }
 }
 
-trainsRef.on("child_added", function(snapshot) {
-    $("#table-body").append(new Train(snapshot).createRow());
-});
-
-setInterval(function(){
+const updateTrainTable = () => {
     $("#table-body").html("");
     trainsRef.on("child_added", function(snapshot) {
         $("#table-body").append(new Train(snapshot).createRow());
     });
+}
+
+updateTrainTable();
+
+setInterval(function(){
+    updateTrainTable();
 }, 60000);
 
 
 function addTrain(event){
-    event.preventDefault()
+    event.preventDefault();
 
     let name = $('#name-input').val();
     let destination = $('#destination-input').val();
@@ -73,7 +79,63 @@ function addTrain(event){
         firstTrainTime,
         frequency
     })
+}
 
+function editTrain(event){
+    event.preventDefault();
+
+    let name = $('#name-edit').val();
+    let destination = $('#destination-edit').val();
+    let firstTrainTime = $('#first-time-edit').val();
+    let frequency = $('#frequency-edit').val();
+
+    trainsRef.child(event.data.key).update({
+        name,
+        destination,
+        firstTrainTime,
+        frequency
+    })
+    updateTrainTable();
+}
+
+function openTrainEditor(event){
+    event.preventDefault();
+    let trainRow = $(this).closest("tr");
+    let trainKey = trainRow.attr("id");
+    let cacheOldRow = trainRow.html();
+    trainRow.html("");
+    trainsRef.child(trainKey).once("value", function(trainSnap){
+        let trainData = trainSnap.val();
+
+        let nameInput = `<label for="name-edit">Train Name:</label><input class="form-control" id="name-edit" value=${trainData.name} type="text">`
+        let destinationInput = `<label for="destination-edit">Destination:</label><input class="form-control" id="destination-edit" value=${trainData.destination} type="text">`
+        let firstTrainInput = `<label for="first-time-edit">First Train:</label><input class="form-control" id="first-time-edit" value=${trainData.firstTrainTime} type="time">`
+        let frequencyInput = `<label for="frequency-edit">Frequency:</label><input class="form-control" id="frequency-edit" value=${trainData.frequency} type="number">`
+        let editSubmitButton = $("<button>").addClass("submit-edit-button").html('<i class="fa fa-check-square"></i>');
+        let cancelButton = $("<button>").addClass("cancel-button").html('<i class="fa fa-ban"></i>');
+        
+        trainRow.append($("<td>").html(nameInput));
+        trainRow.append($("<td>").html(destinationInput));
+        trainRow.append($("<td>").html(firstTrainInput));
+        trainRow.append($("<td>").html(frequencyInput));
+        trainRow.append($("<td>").html(""));
+        trainRow.append($("<td>").html(editSubmitButton));
+        trainRow.append($("<td>").html(cancelButton));
+        editSubmitButton.click({key: trainKey}, editTrain);
+        cancelButton.click(function(){
+            trainRow.html(cacheOldRow);
+        })
+    });
+}
+
+function deleteTrain(){
+    if(confirm("Are you sure you want to permanently delete this train?")){
+        console.log("confirmed!!!! Delete that shit!")
+    }else{
+        return false;
+    }
 }
 
 $("#add-train").on("click", addTrain);
+$(document).on("click", ".edit-button", openTrainEditor);
+$(document).on("click", ".delete-button", deleteTrain);
