@@ -128,9 +128,13 @@ function openTrainEditor(event){
     });
 }
 
-function deleteTrain(){
+function deleteTrain(event){
     if(confirm("Are you sure you want to permanently delete this train?")){
-        console.log("confirmed!!!! Delete that shit!")
+        console.log("confirmed!!!! Delete that shit!");
+        let trainRow = $(this).closest("tr");
+        let trainKey = trainRow.attr("id");
+        trainRow.remove();
+        trainsRef.child(trainKey).remove();
     }else{
         return false;
     }
