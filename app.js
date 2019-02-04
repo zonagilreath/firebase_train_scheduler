@@ -51,6 +51,14 @@ trainsRef.on("child_added", function(snapshot) {
     $("#table-body").append(new Train(snapshot).createRow());
 });
 
+setInterval(function(){
+    $("#table-body").html("");
+    trainsRef.on("child_added", function(snapshot) {
+        $("#table-body").append(new Train(snapshot).createRow());
+    });
+}, 60000);
+
+
 function addTrain(event){
     event.preventDefault()
 
